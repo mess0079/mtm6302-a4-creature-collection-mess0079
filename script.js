@@ -45,3 +45,77 @@ const $creatures = [
 // 4. Save both selected preferences to Local Storage.
 // 5. Check for saved data on load and restore the controls and appearance.
 // Add short pseudocode comments before writing each feature.
+
+// Find the collection, both controls, and the status message.
+const collection = document.getElementById("collection");
+const themeControl = document.getElementById("theme");
+const layoutControl = document.getElementById("layout");
+const status = document.getElementById("status");
+const storageKey = "mtm6302-a4-creature-preferences";
+
+// Loop through the dataset and add one entry for each creature.
+function renderCollection() {
+  for (const creature of $creatures) {
+    const entry = document.createElement("li");
+    entry.className = "creature";
+
+    const image = document.createElement("img");
+    image.src = creature.image;
+    image.alt = creature.alt;
+
+    const info = document.createElement("div");
+    info.className = "creature-info";
+
+    const name = document.createElement("h3");
+    name.textContent = creature.name;
+
+    const description = document.createElement("p");
+    description.className = "creature-description";
+    description.textContent = creature.description;
+
+    info.append(name, description);
+    entry.append(image, info);
+    collection.append(entry);
+  }
+}
+
+// Apply the selected theme and layout using the CSS data attributes.
+function applyPreferences() {
+  document.body.dataset.theme = themeControl.value;
+  collection.dataset.layout = layoutControl.value;
+}
+
+// Read both controls, update the page, and save the choices together.
+function savePreferences() {
+  const preferences = {
+    theme: themeControl.value,
+    layout: layoutControl.value
+  };
+
+  applyPreferences();
+  localStorage.setItem(storageKey, JSON.stringify(preferences));
+  status.textContent = "Your preferences were saved.";
+}
+
+// Check for saved data before parsing. Keep the defaults on a first visit.
+function restorePreferences() {
+  const savedPreferences = localStorage.getItem(storageKey);
+
+  if (savedPreferences === null) {
+    status.textContent = "Choose a habitat and layout to make this collection yours.";
+    return;
+  }
+
+  const preferences = JSON.parse(savedPreferences);
+  themeControl.value = preferences.theme;
+  layoutControl.value = preferences.layout;
+  applyPreferences();
+  status.textContent = "Your saved preferences were restored.";
+}
+
+// Build the entries once, restore any saved choices, and listen for changes.
+renderCollection();
+restorePreferences();
+
+themeControl.addEventListener("change", savePreferences);
+layoutControl.addEventListener("change", savePreferences);
